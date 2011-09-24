@@ -1,16 +1,11 @@
 ﻿namespace Rison
 {
-    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class RisonDecoder : IRisonDecoder
     {
-        private string input;
-        private CharEnumerator charEnumerator;
-
-        public dynamic Decode(string risonString)
-        {
-            return Decode<dynamic>(risonString);
-        }
+        private RisonStringEnumerator enumerator;
 
         public T Decode<T>(string risonString)
         {
@@ -18,20 +13,19 @@
             {
                 throw new RisonDecoderException(risonString);
             }
-            charEnumerator = risonString.GetEnumerator();
-            input = risonString;
+            enumerator = new RisonStringEnumerator(risonString);
 
             var value = ReadValue<T>();
-            if (charEnumerator.MoveNext())
+            if (enumerator.HasNext())
             {
                 throw new RisonDecoderException(risonString);
             }
             return value;
         }
 
-        public T ReadValue<T>()
+        private T ReadValue<T>()
         {
-            var c = Next();
+            var c = enumerator.Next();
             if (c == '!')
             {
                 var o = ParseBang();
@@ -45,23 +39,49 @@
 
         private object ParseBang()
         {
-            switch (Next())
+            switch (enumerator.Next())
             {
                 case ('t'):
                     return true;
                 case ('f'):
                     return false;
+                case ('n'):
+                    return null;
+                case('('):
+                    return ParseArray();
             }
-            throw new RisonDecoderException(input);
+            throw new RisonDecoderException(enumerator.RisonString);
         }
 
-        public char Next()
+        private dynamic[] ParseArray()
         {
-            if (!charEnumerator.MoveNext())
+            var array = new List<object>();
+            while (true)
             {
-                throw new RisonDecoderException(input);
+                var c = enumerator.Next();
+                if (c == ')')
+                {
+                    return array.ToArray();
+                }
+                if (array.Any())
+                {
+                    if (c != ',')
+                    {
+                        throw new RisonDecoderException("Missing ',", enumerator.RisonString);
+                    }
+                }
+                else if (c == ',')
+                {
+                    throw new RisonDecoderException("Extra ',");
+                }
+                else
+                {
+                    enumerator.Previous();
+                }
+
+                var value = ReadValue<dynamic>();
+                array.Add(value);
             }
-            return charEnumerator.Current;
         }
     }
 }
