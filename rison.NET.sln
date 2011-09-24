@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rison", "src\Rison\Rison.csproj", "{424DAF28-3467-4E88-9A42-21ADEB3A5ADC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rison.Tests", "src\Rison.Tests\Rison.Tests.csproj", "{72E51185-25AA-400C-9799-D7BE76441F6B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{424DAF28-3467-4E88-9A42-21ADEB3A5ADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{424DAF28-3467-4E88-9A42-21ADEB3A5ADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{424DAF28-3467-4E88-9A42-21ADEB3A5ADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{424DAF28-3467-4E88-9A42-21ADEB3A5ADC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72E51185-25AA-400C-9799-D7BE76441F6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72E51185-25AA-400C-9799-D7BE76441F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72E51185-25AA-400C-9799-D7BE76441F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72E51185-25AA-400C-9799-D7BE76441F6B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
