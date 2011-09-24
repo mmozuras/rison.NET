@@ -9,6 +9,7 @@
 *.userprefs
 *.swp
 AssemblyInfo.cs
+TestResult.xml
 .DS_Store
 deploy/
 build/
