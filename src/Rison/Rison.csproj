@@ -43,6 +43,11 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="IRisonDecoder.cs" />
+    <Compile Include="IRisonEncoder.cs" />
+    <Compile Include="RisonDecoder.cs" />
+    <Compile Include="RisonDecoderException.cs" />
+    <Compile Include="RisonEncoder.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
