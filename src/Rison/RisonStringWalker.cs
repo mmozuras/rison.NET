@@ -1,11 +1,11 @@
 namespace Rison
 {
-    internal class RisonStringEnumerator
+    internal class RisonStringWalker
     {
         private readonly string risonString;
         private int index;
 
-        public RisonStringEnumerator(string risonString)
+        public RisonStringWalker(string risonString)
         {
             this.risonString = risonString;
             index = -1;
@@ -16,6 +16,12 @@ namespace Rison
             get { return risonString; }
         }
 
+        public int Index
+        {
+            get { return index; }
+            set { index = value; }
+        }
+
         public char Next()
         {
             if (!HasNext())
@@ -23,22 +29,22 @@ namespace Rison
                 throw new RisonDecoderException(risonString);
             }
             index++;
-            return risonString[index];
+            return risonString[Index];
         }
 
         public bool HasNext()
         {
-            return index + 1 < risonString.Length;
+            return Index + 1 < risonString.Length;
         }
 
         public char Previous()
         {
-            if (index == 0)
+            if (Index == 0)
             {
                 throw new RisonDecoderException(risonString);
             }
             index--;
-            return risonString[index];
+            return risonString[Index];
         }
     }
 }

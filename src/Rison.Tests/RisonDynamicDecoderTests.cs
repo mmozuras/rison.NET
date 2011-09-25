@@ -21,6 +21,8 @@
         [TestCase(null)]
         [TestCase("!(,)")]
         [TestCase("!(!t!f)")]
+        [TestCase("-")]
+        [TestCase("4abc")]
         [ExpectedException(typeof(RisonDecoderException))]
         public void Should_throw_exception_when_input_is_invalid(string risonString)
         {
@@ -29,7 +31,7 @@
 
         [TestCase("!t", Result = true)]
         [TestCase("!f", Result = false)]        
-        public bool Should_decode_bool_values(string risonString)
+        public dynamic Should_decode_bool_values(string risonString)
         {
             return risonDecoder.Decode(risonString);
         }
@@ -60,6 +62,19 @@
         {
             var result = risonDecoder.Decode("!(!t,!(!f))");
             CollectionAssert.AreEqual(new dynamic[] { true, new[] { false } }, result);
+        }
+
+        [TestCase("1", Result = 1)]
+        [TestCase("-17", Result = -17)]
+        [TestCase("1.5", Result = 1.5)]
+        [TestCase("-123.456", Result = -123.456)]
+        [TestCase("1.5", Result = 1.5)]
+        [TestCase("-123.456", Result = -123.456)]
+        [TestCase("1e30", Result = 1E+30)]
+        [TestCase("2e-20", Result = 2E-20)]
+        public dynamic Should_decode_numbers(string risonString)
+        {
+            return risonDecoder.Decode(risonString);
         }
     }
 }

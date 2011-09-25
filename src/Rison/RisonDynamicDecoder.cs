@@ -1,11 +1,12 @@
 ﻿namespace Rison
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     public class RisonDynamicDecoder : IRisonDynamicDecoder
     {
-        private RisonStringEnumerator enumerator;
+        private RisonStringWalker walker;
 
         public dynamic Decode(string risonString)
         {
@@ -13,10 +14,10 @@
             {
                 throw new RisonDecoderException(risonString);
             }
-            enumerator = new RisonStringEnumerator(risonString);
+            walker = new RisonStringWalker(risonString);
 
             var value = ReadValue();
-            if (enumerator.HasNext())
+            if (walker.HasNext())
             {
                 throw new RisonDecoderException(risonString);
             }
@@ -25,17 +26,21 @@
 
         private dynamic ReadValue()
         {
-            var c = enumerator.Next();
+            var c = walker.Next();
             if (c == '!')
             {
                 return ParseBang();
+            }
+            if ("-01234567890".Contains(c))
+            {
+                return ParseNumber();
             }
             return null;
         }
 
         private dynamic ParseBang()
         {
-            switch (enumerator.Next())
+            switch (walker.Next())
             {
                 case ('t'):
                     return true;
@@ -46,24 +51,78 @@
                 case('('):
                     return ParseArray();
             }
-            throw new RisonDecoderException(enumerator.RisonString);
+            throw new RisonDecoderException(walker.RisonString);
         }
 
-        private dynamic[] ParseArray()
+        private dynamic ParseNumber()
         {
-            var array = new List<object>();
+            var risonString = walker.RisonString;
+            var index = walker.Index;
+            var start = walker.Index;
+            var state = "int";
+            var dashPermitted = true;
+            var transitions = new Dictionary<string, string>
+                                  {
+                                      {"int+.", "frac"},
+                                      {"int+e", "exp"},
+                                      {"frac+e", "exp"},
+                                  };
             while (true)
             {
-                var c = enumerator.Next();
+                if (index >= risonString.Length)
+                {
+                    index++;
+                    break;
+                }
+
+                var c = risonString[index];
+                index++;
+
+                if (('0' <= c && c <= '9') || (dashPermitted && c == '-'))
+                {
+                    dashPermitted = false;
+                    continue;
+                }
+
+                if (!transitions.ContainsKey(state + '+' + char.ToLower(c)))
+                {
+                    break;
+                }
+
+                state = transitions[state + '+' + char.ToLower(c)];
+                dashPermitted = state == "exp";
+            }
+
+            walker.Index = index - 1;
+            var result = risonString.Substring(start, walker.Index);
+            if (result == "-")
+            {
+                throw new RisonDecoderException("Invalid number", walker.RisonString);
+            }
+            if (result.Contains("e") || result.Contains("."))
+            {
+                var cultureInfo = (CultureInfo) CultureInfo.CurrentCulture.Clone();
+                cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
+                return double.Parse(result, NumberStyles.Any, cultureInfo);
+            }
+            return int.Parse(result);
+        }
+
+        private IEnumerable<dynamic> ParseArray()
+        {
+            var result = new List<dynamic>();
+            while (true)
+            {
+                var c = walker.Next();
                 if (c == ')')
                 {
-                    return array.ToArray();
+                    return result;
                 }
-                if (array.Any())
+                if (result.Any())
                 {
                     if (c != ',')
                     {
-                        throw new RisonDecoderException("Missing ',", enumerator.RisonString);
+                        throw new RisonDecoderException("Missing ',", walker.RisonString);
                     }
                 }
                 else if (c == ',')
@@ -72,11 +131,11 @@
                 }
                 else
                 {
-                    enumerator.Previous();
+                    walker.Previous();
                 }
 
                 var value = ReadValue();
-                array.Add(value);
+                result.Add(value);
             }
         }
     }
