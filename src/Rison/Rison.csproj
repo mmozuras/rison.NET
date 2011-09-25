@@ -43,9 +43,9 @@
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="IRisonDecoder.cs" />
+    <Compile Include="IRisonDynamicDecoder.cs" />
     <Compile Include="IRisonEncoder.cs" />
-    <Compile Include="RisonDecoder.cs" />
+    <Compile Include="RisonDynamicDecoder.cs" />
     <Compile Include="RisonDecoderException.cs" />
     <Compile Include="RisonEncoder.cs" />
     <Compile Include="RisonStringEnumerator.cs" />

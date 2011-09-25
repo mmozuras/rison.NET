@@ -3,11 +3,11 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    public class RisonDecoder : IRisonDecoder
+    public class RisonDynamicDecoder : IRisonDynamicDecoder
     {
         private RisonStringEnumerator enumerator;
 
-        public T Decode<T>(string risonString)
+        public dynamic Decode(string risonString)
         {
             if (string.IsNullOrWhiteSpace(risonString))
             {
@@ -15,7 +15,7 @@
             }
             enumerator = new RisonStringEnumerator(risonString);
 
-            var value = ReadValue<T>();
+            var value = ReadValue();
             if (enumerator.HasNext())
             {
                 throw new RisonDecoderException(risonString);
@@ -23,21 +23,17 @@
             return value;
         }
 
-        private T ReadValue<T>()
+        private dynamic ReadValue()
         {
             var c = enumerator.Next();
             if (c == '!')
             {
-                var o = ParseBang();
-                if (o is T)
-                {
-                    return (T) o;
-                }
+                return ParseBang();
             }
-            return default(T);
+            return null;
         }
 
-        private object ParseBang()
+        private dynamic ParseBang()
         {
             switch (enumerator.Next())
             {
@@ -79,7 +75,7 @@
                     enumerator.Previous();
                 }
 
-                var value = ReadValue<dynamic>();
+                var value = ReadValue();
                 array.Add(value);
             }
         }
