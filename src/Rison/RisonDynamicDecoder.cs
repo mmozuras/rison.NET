@@ -31,6 +31,10 @@
             {
                 return ParseBang();
             }
+            if (c == '\'')
+            {
+                return ParseSingleQuote();
+            }
             if ("-01234567890".Contains(c))
             {
                 return ParseNumber();
@@ -52,6 +56,56 @@
                     return ParseArray();
             }
             throw new RisonDecoderException(walker.RisonString);
+        }
+
+        private dynamic ParseSingleQuote()
+        {
+            var risonString = walker.RisonString;
+            walker.Next();
+            var index = walker.Index;
+            var start = walker.Index;
+            var segments = new List<dynamic>();
+
+            while (true)
+            {
+                if (index >= risonString.Length)
+                {
+                    throw new RisonDecoderException("Unmatched '");
+                }
+
+                var c = risonString[index];
+                if (c == '\'')
+                    break;
+
+                index++;
+                if (c == '!')
+                {
+                    if (start < index - 1)
+                    {
+                        segments.Add(risonString.Substring(start, index - start - 1));
+                    }
+                    c = risonString[index];
+                    index++;
+                    if ("!'".Contains(c))
+                    {
+                        segments.Add(c);
+                    }
+                    else
+                    {
+                        throw new RisonDecoderException(string.Format("Invalid string escape: '!{0}'", c));
+                    }
+
+                    start = index;
+                }
+            }
+
+            if (start < index)
+            {
+                segments.Add(risonString.Substring(start, index - start));
+            }
+
+            walker.Index = index;
+            return string.Join("", segments);
         }
 
         private dynamic ParseNumber()
@@ -94,7 +148,7 @@
             }
 
             walker.Index = index - 1;
-            var result = risonString.Substring(start, walker.Index);
+            var result = risonString.Substring(start, walker.Index - start);
             if (result == "-")
             {
                 throw new RisonDecoderException("Invalid number", walker.RisonString);

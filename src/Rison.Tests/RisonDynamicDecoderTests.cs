@@ -23,6 +23,9 @@
         [TestCase("!(!t!f)")]
         [TestCase("-")]
         [TestCase("4abc")]
+        [TestCase("'")]
+        [TestCase("'abc")]
+        [TestCase("'a!'!'")]
         [ExpectedException(typeof(RisonDecoderException))]
         public void Should_throw_exception_when_input_is_invalid(string risonString)
         {
@@ -73,6 +76,18 @@
         [TestCase("1e30", Result = 1E+30)]
         [TestCase("2e-20", Result = 2E-20)]
         public dynamic Should_decode_numbers(string risonString)
+        {
+            return risonDecoder.Decode(risonString);
+        }
+
+        [TestCase("'a'", Result = "a")]
+        [TestCase("'-b'", Result = "-b")]
+        [TestCase("''", Result = "")]
+        [TestCase("'don!'t'", Result = "don't")]
+        [TestCase("'double!!'", Result = "double!")]
+        [TestCase("'a b c'", Result = "a b c")]
+        [TestCase("'user@domain.com'", Result = "user@domain.com")]
+        public dynamic Should_decode_strings(string risonString)
         {
             return risonDecoder.Decode(risonString);
         }
