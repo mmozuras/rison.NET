@@ -244,7 +244,7 @@
         {
             var substring = walker.RisonString.Substring(walker.Index);
 
-            var match = GetIndexMatch(substring);
+            var match = GetIdMatch(substring);
             if (match.Success)
             {
                 var id = match.Groups[0].Value;
@@ -254,7 +254,7 @@
             throw new RisonDecoderException(string.Format("Invalid character: '{0}'", c));
         }
 
-        private static Match GetIndexMatch(string input)
+        private static Match GetIdMatch(string input)
         {
             var lettersAndDigits = string.Join(string.Empty, Enumerable.Range(0, 127)
                                                                  .Select(i => (char) i)
