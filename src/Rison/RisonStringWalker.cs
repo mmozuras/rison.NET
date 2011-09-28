@@ -34,7 +34,7 @@ namespace Rison
 
         public bool HasNext()
         {
-            return Index + 1 < risonString.Length;
+            return Index + 1 != risonString.Length;
         }
 
         public char Previous()

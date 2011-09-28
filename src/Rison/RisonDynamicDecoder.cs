@@ -1,8 +1,10 @@
 ﻿namespace Rison
 {
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Globalization;
     using System.Linq;
+    using System.Text.RegularExpressions;
 
     public class RisonDynamicDecoder : IRisonDynamicDecoder
     {
@@ -31,6 +33,10 @@
             {
                 return ParseBang();
             }
+            if (c == '(')
+            {
+                return ParseOpenParen();
+            }
             if (c == '\'')
             {
                 return ParseSingleQuote();
@@ -39,7 +45,8 @@
             {
                 return ParseNumber();
             }
-            return null;
+            
+            return ParseId(c);
         }
 
         private dynamic ParseBang()
@@ -56,6 +63,46 @@
                     return ParseArray();
             }
             throw new RisonDecoderException(walker.RisonString);
+        }
+
+        private dynamic ParseOpenParen()
+        {
+            var count = 0;
+            var result = new ExpandoObject() as IDictionary<string, object>;
+
+            while (true)
+            {
+                var c = walker.Next();
+                if (c == ')')
+                {
+                    return result;
+                }
+                if (count > 0)
+                {
+                    if (c != ',')
+                    {
+                        throw new RisonDecoderException("Missing ','");
+                    }
+                }
+                else if (c == ',')
+                {
+                    throw new RisonDecoderException("Extra ','");
+                }
+                else
+                {
+                    walker.Previous();
+                }
+
+                var key = ReadValue();
+                if (walker.Next() != ':')
+                {
+                    throw new RisonDecoderException("Missing ':'");
+                }
+
+                var value = ReadValue();
+                result.Add(key, value);
+                count += 1;
+            }
         }
 
         private dynamic ParseSingleQuote()
@@ -125,7 +172,6 @@
             {
                 if (index >= risonString.Length)
                 {
-                    index++;
                     break;
                 }
 
@@ -140,6 +186,7 @@
 
                 if (!transitions.ContainsKey(state + '+' + char.ToLower(c)))
                 {
+                    index--;
                     break;
                 }
 
@@ -148,7 +195,7 @@
             }
 
             walker.Index = index - 1;
-            var result = risonString.Substring(start, walker.Index - start);
+            var result = risonString.Substring(start, walker.Index - start + 1);
             if (result == "-")
             {
                 throw new RisonDecoderException("Invalid number", walker.RisonString);
@@ -158,7 +205,7 @@
                 var cultureInfo = (CultureInfo) CultureInfo.CurrentCulture.Clone();
                 cultureInfo.NumberFormat.CurrencyDecimalSeparator = ".";
                 return double.Parse(result, NumberStyles.Any, cultureInfo);
-            }
+            }            
             return int.Parse(result);
         }
 
@@ -191,6 +238,32 @@
                 var value = ReadValue();
                 result.Add(value);
             }
+        }
+
+        private dynamic ParseId(char c)
+        {
+            var substring = walker.RisonString.Substring(walker.Index);
+
+            var match = GetIndexMatch(substring);
+            if (match.Success)
+            {
+                var id = match.Groups[0].Value;
+                walker.Index = walker.Index + id.Length - 1;
+                return id;
+            }
+            throw new RisonDecoderException(string.Format("Invalid character: '{0}'", c));
+        }
+
+        private static Match GetIndexMatch(string input)
+        {
+            var lettersAndDigits = string.Join(string.Empty, Enumerable.Range(0, 127)
+                                                                 .Select(i => (char) i)
+                                                                 .Where(char.IsLetterOrDigit));
+            var notIdChar = lettersAndDigits + "_./~" + Regex.Escape("-");
+
+            const string notIdStart = "-0123456789";
+            var regexPattern = string.Format("[{0}{1}][{1}]*", notIdStart, notIdChar);
+            return Regex.Match(input, regexPattern);
         }
     }
 }
