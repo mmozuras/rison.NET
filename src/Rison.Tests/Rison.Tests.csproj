@@ -59,6 +59,8 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="RisonDynamicDecoderTests.cs" />
+    <Compile Include="RisonEncoderTests.cs" />
+    <Compile Include="Person.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

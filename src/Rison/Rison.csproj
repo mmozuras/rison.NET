@@ -45,6 +45,7 @@
     </Compile>
     <Compile Include="IRisonDynamicDecoder.cs" />
     <Compile Include="IRisonEncoder.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="RisonDynamicDecoder.cs" />
     <Compile Include="RisonDecoderException.cs" />
     <Compile Include="RisonEncoder.cs" />
